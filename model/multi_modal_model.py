@@ -1,10 +1,11 @@
 from torch import nn
 import torch
 import sys
-from .xai_transformer import BertSelfOutput, AttentionBlock, BertPooler, PositionalEncoding, LayerNorm
+from .xai_transformer import BertSelfOutput, AttentionBlock, BertPooler, PositionalEncoding
 
 root_dir = './../'
 sys.path.append(root_dir)
+from .layer_norm import LayerNorm
 
 
 class SubmodalPhysi(nn.Module):
@@ -23,13 +24,6 @@ class SubmodalPhysi(nn.Module):
 
         self.pooler = BertPooler(config)
 
-        self.attention_probs = {i: [] for i in range(n_blocks)}
-        self.attention_debug = {i: [] for i in range(n_blocks)}
-        self.attention_gradients = {i: [] for i in range(n_blocks)}
-        self.attention_cams = {i: [] for i in range(n_blocks)}
-
-        self.attention_lrp_gradients = {i: [] for i in range(n_blocks)}
-
     def forward(self, input_states):
         # input_states.to(self.config["device"])
         attn_input = self.pos_emb(input_states.transpose(0, 1)).transpose(0, 1)
@@ -37,78 +31,10 @@ class SubmodalPhysi(nn.Module):
         for i, block in enumerate(self.attention_layers):
             output, attention_probs = block(attn_input)
 
-            self.attention_probs[i] = attention_probs
-
             attn_input = output
 
         pooled = self.pooler(output)
         return pooled
-
-    def xai_forward(self, input_states,
-                    labels=None,
-                    gammas=None,
-                    method=None):
-
-        # Forward
-        self.A = {}
-
-        # input_states.to(self.config["device"])
-        attn_input = self.pos_emb(input_states.transpose(0, 1)).transpose(0, 1)
-
-        self.A['input_states'] = attn_input
-
-        for i, block in enumerate(self.attention_layers):
-            # [1, 12, 768] -> [1, 12, 768]
-            attn_inputdata = attn_input.data
-            attn_inputdata.requires_grad_(True)
-
-            self.A['attn_input_{}_data'.format(i)] = attn_inputdata
-            self.A['attn_input_{}'.format(i)] = attn_input
-
-            gamma = 0. if gammas is None else gammas[i]
-            #  print('using gamma', gamma)
-
-            output, attention_probs = block(self.A['attn_input_{}_data'.format(i)], gamma=gamma, method=method)
-
-            self.attention_probs[i] = attention_probs
-            attn_input = output
-
-        # (1, 12, 768) -> (1x768)
-
-        outputdata = output.data
-        outputdata.requires_grad_(True)
-
-        self.A['output'] = output
-        self.A['outputdata'] = outputdata
-
-        pooled = self.pooler(outputdata)
-        pooleddata = pooled.data
-
-        self.A['pooled'] = pooled
-
-        pooleddata.requires_grad_(True)
-        return pooleddata
-
-    def xai_backward(self, pooleddata, method=None):
-
-        (pooleddata.grad * self.A['pooled']).sum().backward()
-
-        Rpool = (self.A['outputdata'].grad * self.A['output'])
-
-        R_ = Rpool
-        for i, block in list(enumerate(self.attention_layers))[::-1]:
-            R_.sum().backward()
-
-            R_grad = self.A['attn_input_{}_data'.format(i)].grad
-            R_attn = R_grad * self.A['attn_input_{}'.format(i)]
-            if method == 'GAE':
-                self.attention_gradients[i] = block.get_attn_gradients().squeeze()
-            R_ = R_attn
-
-        all_R = torch.squeeze(R_).detach().cpu().numpy()
-        R = R_.sum(2).detach().cpu().numpy()
-
-        return {'R': R, 'all_R': all_R}
 
 
 class SubmodalNotes(nn.Module):
@@ -123,22 +49,12 @@ class SubmodalNotes(nn.Module):
         self.attention_layers = torch.nn.Sequential(*[AttentionBlock(config) for i in range(n_blocks)])
         self.pooler = BertPooler(config)
 
-        self.attention_probs = {i: [] for i in range(n_blocks)}
-        self.attention_debug = {i: [] for i in range(n_blocks)}
-        self.attention_gradients = {i: [] for i in range(n_blocks)}
-        self.attention_cams = {i: [] for i in range(n_blocks)}
-
-        self.attention_lrp_gradients = {i: [] for i in range(n_blocks)}
-
     def forward(self, input):
 
         attn_input = self.embeds(input)
 
         for i, block in enumerate(self.attention_layers):
             output, attention_probs = block(attn_input)
-
-            self.attention_probs[i] = attention_probs
-
             attn_input = output
 
         pooled = self.pooler(output)
@@ -162,7 +78,7 @@ class SubmodalVital(nn.Module):
         self.pooler = BertPooler(config)
 
     def forward(self, input):
-
+        # input_states.to(self.config["device"])
         input_states = self.input_projection(input)
         attn_input = self.pos_emb(input_states.transpose(0, 1)).transpose(0, 1)
 

@@ -1,0 +1,51 @@
+{
+  "path_setting": {
+    "metadata": "data/dataset/multimodal.csv",
+    "pickle_path": "data/dataset/pickle/align_notes",
+    "study_path": "exp_model_performance/study/note"
+  },
+  "exp_setting": {
+    "epochs": 20,
+    "random_seed": 1234,
+    "model_name": "notes_attention",
+    "verbose": false
+  },
+  "model_setting": {
+    "xai_transformer": {
+      "hidden_size": 768,
+      "detach_kq": false,
+      "detach_layernorm": false,
+      "n_classes": 2,
+      "train_mode": true,
+      "layer_norm_eps": 1e-12
+    },
+    "RNN": {
+      "input_size": 768,
+      "n_classes": 2
+    },
+    "LSTM": {
+      "input_size": 768,
+      "n_classes": 2
+    },
+    "GRU": {
+      "input_size": 768,
+      "n_classes": 2
+    },
+    "RCNN": {
+      "input_size": 768,
+      "n_classes": 2
+    },
+    "AttRNN": {
+      "input_size": 768,
+      "n_classes": 2
+    },
+    "Transformer": {
+      "hidden_size": 768,
+      "n_classes": 2
+    },
+    "BERT": {
+      "hidden_size": 768,
+      "n_classes": 2
+    }
+  }
+}

@@ -1,0 +1,57 @@
+{
+  "path_setting": {
+    "metadata": "data/dataset/multimodal.csv",
+    "pickle_path": "data/dataset/pickle/align_vital",
+    "study_path": "exp_model_performance/study/vital"
+  },
+  "exp_setting": {
+    "epochs": 40,
+    "random_seed": 1234,
+    "model_name": "vital_attention",
+    "verbose": false
+  },
+  "model_setting": {
+    "xai_transformer": {
+      "input_size": 21,
+      "detach_kq": false,
+      "detach_layernorm": false,
+      "n_classes": 2,
+      "train_mode": true,
+      "layer_norm_eps": 1e-12
+    },
+    "RNN": {
+      "input_size": 21,
+      "n_classes": 2
+    },
+    "LSTM": {
+      "input_size": 21,
+      "n_classes": 2
+    },
+    "GRU": {
+      "input_size": 21,
+      "n_classes": 2
+    },
+    "RCNN": {
+      "input_size": 21,
+      "n_classes": 2
+    },
+    "AttRNN": {
+      "input_size": 21,
+      "n_classes": 2
+    },
+    "Transformer": {
+      "hidden_size": 42,
+      "num_attention_heads": 2,
+      "all_head_size": 768,
+      "n_blocks": 3,
+      "d_ffn": 336,
+      "drop_out": 0.4,
+      "activation": "gelu",
+      "detach_kq": false,
+      "detach_layernorm": false,
+      "train_mode": true,
+      "layer_norm_eps": 1e-12,
+      "n_classes": 2
+    }
+  }
+}

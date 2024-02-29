@@ -3,7 +3,7 @@ import numpy as np
 from torch.utils.data import Dataset
 from sklearn.preprocessing import normalize
 
-from utils import read_chunk
+from .readers import read_chunk
 # from wfdb.processing import normalize_bound
 # import neurokit2 as nk
 # from torch_ecg.cfg import CFG

@@ -1,0 +1,86 @@
+{
+  "path_setting": {
+    "metadata": "data/dataset/multimodal.csv",
+    "pickle_path": "data/dataset/pickle/align_all",
+    "study_path": "exp_multi_modal/study",
+    "physi_ckpt_path": "exp_model_performance/ckpt/physi/physi_attention",
+    "notes_ckpt_path": "exp_model_performance/ckpt/note/notes_attention",
+    "vital_ckpt_path": "exp_model_performance/ckpt/vital/vital_attention"
+  },
+  "exp_setting": {
+    "modal": ["vital", "notes", "physi"],
+    "epochs": 20,
+    "random_seed": 1234,
+    "verbose": false,
+    "lr": 1e-4,
+    "batch_size": 64,
+     "class_weight": 1.5
+  },
+  "model_setting": {
+    "notes": {
+      "hidden_size": 768,
+      "detach_kq": false,
+      "detach_layernorm": false,
+      "n_classes": 2,
+      "train_mode": true,
+      "layer_norm_eps": 1e-12,
+      "n_blocks": 6,
+      "drop_out": 0.4,
+      "num_attention_heads": 32,
+      "all_head_size": 512,
+      "attention_head_size": 16
+    },
+    "physi": {
+      "hidden_size": 76,
+      "detach_kq": false,
+      "detach_layernorm": false,
+      "all_head_size": 768,
+      "n_classes": 2,
+      "train_mode": true,
+      "layer_norm_eps": 1e-12,
+      "drop_out": 0.2,
+      "n_blocks": 2,
+      "num_attention_heads": 8,
+      "attention_head_size": 96
+    },
+    "vital": {
+      "input_size": 21,
+      "hidden_size": 128,
+      "detach_kq": false,
+      "detach_layernorm": false,
+      "all_head_size": 128,
+      "n_classes": 2,
+      "train_mode": true,
+      "layer_norm_eps": 1e-12,
+      "drop_out": 0.5,
+      "n_blocks": 2,
+      "num_attention_heads": 16,
+      "attention_head_size": 8
+    },
+    "notes_physi": {
+      "notes_hidden": 20,
+      "physi_hidden": 100,
+      "total_hidden": 120,
+      "n_classes": 2
+    },
+    "notes_vital": {
+      "notes_hidden": 20,
+      "vital_hidden": 50,
+      "total_hidden": 70,
+      "n_classes": 2
+    },
+    "physi_vital": {
+      "physi_hidden": 100,
+      "vital_hidden": 50,
+      "total_hidden": 150,
+      "n_classes": 2
+    },
+    "notes_physi_vital":{
+      "notes_hidden": 20,
+      "physi_hidden": 100,
+      "vital_hidden": 50,
+      "total_hidden": 170,
+      "n_classes": 2
+    }
+  }
+}
