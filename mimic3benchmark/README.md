@@ -28,7 +28,7 @@ Here are the required steps to build the multi-modal benchmark. It assumes that 
 
        python mimic3benchmark/scripts/extract_vital_sign_from_subjects.py --mimic3_path {PATH TO MIMIC-III Waveform Matched Subset RECORDS-numerics} --data_path data/root/
 
-6. The following commands will build multi-modal datasets, which can later be used in models. These commands are independent, if you are going to work only on one benchmark task, you can run only the corresponding command.
+6. The following commands will build multi-modal datasets, which can later be used in models. Note that the above commands are independent, if you are going to work only on one or two modalities, you can run only the corresponding command.
 
        python mimic3benchmark/scripts/create_multimodal.py --data_path data/root --out_path {PATH TO SAVE DATASET}
 
