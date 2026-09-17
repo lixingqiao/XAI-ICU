@@ -186,7 +186,7 @@ Users should obtain authorized access to the corresponding PhysioNet datasets be
 
 ## Publication
 
-**Xingqiao Li, Jindong Gu, Zhiyong Wang, Yancheng Yuan, Bo Du, and Fengxiang He**
+**Xingqiao Li, Jindong Gu, Zhiyong Wang, Yancheng Yuan, Fengxiang He and Bo Du**
 
 *XAI for In-Hospital Mortality Prediction via Multimodal ICU Data*
 
@@ -211,8 +211,6 @@ If you find this work useful, please cite:
   organization={IEEE}
 }
 ```
-
-The citation information will be updated with the final IEEE BIBM bibliographic record when available.
 
 ---
 
