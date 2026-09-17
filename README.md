@@ -12,43 +12,39 @@ The project integrates three types of clinical information:
 
 We develop an **eXplainable Multimodal Mortality Predictor (X-MMP)** for multimodal representation learning and introduce **LRPTrans**, an extension of Layer-Wise Relevance Propagation (LRP) to Transformer architectures, for interpreting predictions across heterogeneous clinical modalities.
 
-Paper:
+**Paper:**  
+Xingqiao Li et al., *XAI for In-Hospital Mortality Prediction via Multimodal ICU Data*, IEEE BIBM 2025.
 
-**Xingqiao Li et al.**  
-*XAI for In-Hospital Mortality Prediction via Multimodal ICU Data*
-
-IEEE BIBM 2025
-
-Preprint: [arXiv:2312.17624](https://arxiv.org/abs/2312.17624)
+[Preprint: arXiv:2312.17624](https://arxiv.org/abs/2312.17624)
 
 ---
 
 ## Framework
 
 <p align="center">
-  <img width="90%" src="framework.png" />
+  <img src="figure/framework.png" width="90%">
 </p>
 
-X-MMP contains modality-specific Transformer encoders for heterogeneous ICU inputs.
+X-MMP uses modality-specific Transformer-based encoders to learn representations from heterogeneous ICU data.
 
 The learned representations from different modalities are integrated through **late fusion** for in-hospital mortality prediction.
 
-LRPTrans propagates attribution through Transformer-based encoders to estimate the contribution of individual input features and different modalities to the final prediction.
+To interpret model decisions, **LRPTrans** propagates attribution through the Transformer architecture and estimates the contribution of input features from different clinical modalities to the final prediction.
 
 ---
 
 ## Multimodal ICU Data
 
-The multimodal dataset is constructed using:
+The multimodal dataset is constructed based on:
 
 - **MIMIC-III**
 - **MIMIC-III Waveform Database Matched Subset**
 
-Three modalities are considered.
+Three complementary modalities are used.
 
 ### Discrete Clinical Events
 
-Structured and time-stamped clinical measurements collected during the ICU stay.
+Structured and time-stamped clinical observations recorded during the ICU stay.
 
 ### Vital Signs
 
@@ -56,15 +52,21 @@ High-density physiological signals and bedside-monitoring measurements.
 
 ### Clinical Notes
 
-Unstructured clinical text modeled with representations derived from **ClinicalBERT**.
+Unstructured clinical text describing patient status and clinical observations.
+
+<p align="center">
+  <img src="figure/multimodal_data_overview.png" width="92%">
+</p>
+
+The three modalities provide complementary information from structured clinical records, physiological monitoring, and free-text documentation.
 
 ---
 
 ## Main Results
 
-### Mortality Prediction
+### Multimodal Mortality Prediction
 
-The tri-modal X-MMP model achieves the best predictive performance among the evaluated single-modal and multimodal configurations.
+We compare single-modal, bi-modal, and tri-modal configurations to evaluate the contribution of heterogeneous clinical information.
 
 | Input Modality | AUC-ROC | AUC-PR |
 |---|---:|---:|
@@ -74,32 +76,28 @@ The tri-modal X-MMP model achieves the best predictive performance among the eva
 | Clinical Notes + Discrete Events | 0.851 | 0.406 |
 | **All three modalities (X-MMP)** | **0.858** | **0.430** |
 
-The tri-modal model achieves:
+The tri-modal model achieves the highest AUC-ROC:
 
-- **AUC-ROC = 0.858**
-- higher AUC-ROC than the best single-modal model (**0.842**)
-- higher AUC-ROC than the best bi-modal model (**0.851**)
+- **X-MMP: 0.858**
+- Best single-modal model: **0.842**
+- Best bi-modal model: **0.851**
 
-These results demonstrate the complementary information provided by heterogeneous clinical modalities.
+These results demonstrate that the three ICU modalities provide complementary information for mortality prediction.
 
 ---
 
-## Explainability Results
+## Explainability Evaluation
 
-To quantitatively evaluate explanation quality, we conduct input perturbation experiments.
+To quantitatively evaluate explanation quality, we conduct input perturbation experiments and compare LRPTrans with representative attribution approaches.
 
-Input features are progressively removed according to their attribution scores, and the resulting change in predictive performance is measured.
-
-The evaluation compares:
+The evaluated methods include:
 
 - Random attribution
 - Last-layer Attention
 - Attention Rollout
-- Integrated Gradients (IG)
+- Integrated Gradients
 - LRP
 - **LRPTrans**
-
-### Perturbation Results
 
 | Modality | Random | Attention Rollout | Attention Last | IG | LRP | **LRPTrans** |
 |---|---:|---:|---:|---:|---:|---:|
@@ -113,17 +111,21 @@ LRPTrans achieves the best or tied-best interpretation performance across all th
 
 ---
 
-## Interpretation of Multimodal Predictions
+## Explainability Example
 
-LRPTrans supports attribution analysis at both the feature and modality levels.
+LRPTrans can attribute model predictions back to individual clinical features.
 
-The analysis identifies clinically meaningful features associated with mortality risk, including:
+The following example illustrates feature-level attribution for structured clinical event sequences.
 
-- Glasgow Coma Scale (GCS) measurements from structured clinical events;
-- clinically relevant terms such as `arrest`, `unresponsive`, and `dnr/dni` from clinical notes;
-- abnormal physiological patterns such as heart-rate peaks and SpO2-related signals from vital-sign data.
+<p align="center">
+  <img src="figure/explainability_case_events.png" width="88%">
+</p>
 
-The framework therefore supports both mortality prediction and analysis of the clinical evidence contributing to model decisions.
+The attribution analysis identifies clinically meaningful structured variables associated with mortality prediction.
+
+In the study, features related to the **Glasgow Coma Scale (GCS)** are among the important factors identified by the model. Lower GCS measurements, which indicate impaired consciousness and more severe patient status, show stronger positive contributions to mortality predictions.
+
+This analysis demonstrates how X-MMP can provide interpretable evidence for individual model decisions rather than only producing a mortality probability.
 
 ---
 
@@ -132,124 +134,40 @@ The framework therefore supports both mortality prediction and analysis of the c
 ```text
 XAI-ICU/
 ├── config/
-│   ├── exp_explain/
-│   ├── exp_model_performance/
-│   └── exp_multi_modal/
-│
 ├── exp_explain_multimodal/
-│   ├── explain_multimodal.py
-│   ├── explain_notes.py
-│   ├── explain_time_series.py
-│   ├── explain_vital_signs.py
-│   └── xai_model.py
-│
 ├── exp_model_performance/
-│   ├── notes/
-│   ├── physi/
-│   └── vital/
-│
 ├── exp_multi_modal/
-│   ├── multi_modal_analysis.ipynb
-│   ├── params_search.py
-│   └── train_eval.py
-│
 ├── mimic3benchmark/
-│   ├── resources/
-│   ├── scripts/
-│   └── data preprocessing utilities
-│
 ├── model/
-│   ├── multi_modal_model.py
-│   ├── xai_transformer.py
-│   └── modality-specific models
-│
 ├── utils/
-│   └── preprocessing, dataset, metric, and attribution utilities
 │
-├── framework.png
+├── figure/
+│   ├── framework.png
+│   ├── multimodal_data_overview.png
+│   └── explainability_case_events.png
+│
 ├── LICENSE
 └── README.md
 ```
 
----
+The repository contains implementations for:
 
-## Experiments
-
-The repository contains three major groups of experiments.
-
-### 1. Single-Modality Modeling
-
-Models are evaluated independently on:
-
-- discrete clinical events,
-- clinical notes,
-- vital signs.
-
-The experiments compare Transformer-based models with representative recurrent and convolutional baselines.
-
-Relevant code:
-
-```text
-exp_model_performance/
-```
+- single-modality prediction experiments;
+- multimodal fusion experiments;
+- Transformer-based mortality prediction;
+- LRPTrans attribution;
+- perturbation-based explanation evaluation;
+- multimodal ICU data preprocessing.
 
 ---
 
-### 2. Multimodal Modeling
+## Data Availability
 
-Different combinations of ICU modalities are evaluated to analyze the complementarity of heterogeneous clinical information.
-
-Relevant code:
-
-```text
-exp_multi_modal/
-```
-
-Example:
-
-```bash
-python exp_multi_modal/train_eval.py \
-  -c config/exp_multi_modal/params_multi_modal.json \
-  -d 0
-```
-
-The configuration file controls the selected modalities, model settings, training parameters, and local data paths.
-
----
-
-### 3. Explainability Analysis
-
-LRPTrans and other attribution methods are evaluated through perturbation experiments and multimodal attribution analysis.
-
-Relevant code:
-
-```text
-exp_explain_multimodal/
-```
-
-Example:
-
-```bash
-python exp_explain_multimodal/explain_multimodal.py \
-  -c config/exp_explain/params_explain.json \
-  -d 0
-```
-
----
-
-## Data Preparation
-
-The project uses **MIMIC-III** and the **MIMIC-III Waveform Database Matched Subset**.
+This project uses **MIMIC-III** and the **MIMIC-III Waveform Database Matched Subset**.
 
 Due to the access requirements of the MIMIC datasets, the original patient data are **not distributed in this repository**.
 
-Utilities for extracting and preprocessing the required data are provided under:
-
-```text
-mimic3benchmark/
-```
-
-Users should first obtain authorized access to the corresponding PhysioNet datasets and then configure the local data paths before running the preprocessing and training pipelines.
+Users should obtain authorized access to the corresponding PhysioNet datasets before running the preprocessing and experimental pipelines.
 
 ---
 
@@ -259,7 +177,7 @@ Users should first obtain authorized access to the corresponding PhysioNet datas
 - Transformer
 - Explainable Artificial Intelligence
 - Clinical AI
-- Time-Series Modeling
+- Clinical Time-Series Modeling
 - Clinical NLP
 - Feature Attribution
 - ICU Outcome Prediction
@@ -274,8 +192,7 @@ Users should first obtain authorized access to the corresponding PhysioNet datas
 
 **IEEE BIBM 2025**
 
-Preprint:
-
+Preprint:  
 [https://arxiv.org/abs/2312.17624](https://arxiv.org/abs/2312.17624)
 
 ---
@@ -285,15 +202,17 @@ Preprint:
 If you find this work useful, please cite:
 
 ```bibtex
-@article{li2023xai,
-  title={XAI for In-Hospital Mortality Prediction via Multimodal ICU Data},
-  author={Li, Xingqiao and Gu, Jindong and Wang, Zhiyong and Yuan, Yancheng and Du, Bo and He, Fengxiang},
-  journal={arXiv preprint arXiv:2312.17624},
-  year={2023}
+@inproceedings{li2025xai,
+  title={XAI for in-hospital mortality prediction via multimodal ICU data},
+  author={Li, Xingqiao and Gu, Jindong and Wang, Zhiyong and Yuan, Yancheng and He, Fengxiang and Du, Bo},
+  booktitle={2025 IEEE International Conference on Bioinformatics and Biomedicine (BIBM)},
+  pages={3798--3801},
+  year={2025},
+  organization={IEEE}
 }
 ```
 
-The citation information can be updated to the final IEEE BIBM publication record when the official bibliographic information is available.
+The citation information will be updated with the final IEEE BIBM bibliographic record when available.
 
 ---
 
